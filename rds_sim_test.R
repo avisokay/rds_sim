@@ -1,6 +1,12 @@
 library(igraph)
 library(ggplot2)
 library(data.table)
+library(extrafont)
+
+# for fonts
+# font_import()  # Will import all system fonts, including Arial
+# loadfonts(device = "win")  # For Windows
+
 
 # --- GENERATE NETWORK -----------
 
@@ -11,7 +17,7 @@ g <- make_empty_graph(n = num_nodes, directed = FALSE)
 # Assign age distribution to nodes with a normal distribution between 18 and 65
 set.seed(123)  # Set seed for reproducibility
 ages <- round(rnorm(num_nodes, mean = 41.5, sd = 10))  # Mean of (18+65)/2 and sd chosen
-ages <- pmax(pmin(ages, 65), 18)  # Ensure ages are within 18 to 65
+ages <- pmax(pmin(ages, 100), 18)  # Ensure ages are within 18 to 65
 V(g)$age <- ages
 
 # Assign binary female distribution 70/30 female/male
@@ -19,8 +25,8 @@ females <- sample(c(1, 0), num_nodes, replace = TRUE, prob = c(0.7, 0.3))
 V(g)$female <- females
 
 # Set average and sd degree
-avg_degree <- 7
-sd_degree <- 2
+avg_degree <- 6
+sd_degree <- 4
 
 # Choose level of homophily
 homophily = 0.9
@@ -28,7 +34,7 @@ homophily = 0.9
 # Compute number of edges needed
 num_edges <- round((avg_degree * num_nodes) / 2)
 
-# Create an empty edge list
+# Create an empty edge list=
 edge_list <- vector("list", num_edges)
 
 # Generate edges with trait homophily based on gender and age similarity
@@ -493,7 +499,7 @@ plot_wave_data <- function(dt, custom_title) {
     scale_size_continuous(range=c(min(dt$Participants)/min(dt$Participants), 
                                   max(dt$Participants)/min(dt$Participants))) +
     scale_y_continuous(name = "Mean Age (yr)", 
-                       breaks = seq(0, 100, by = 10),
+                       breaks = seq(0, 70, by = 10),
                        limits = c(0, 100),
                        sec.axis = sec_axis(~ ., name = "Percent Female")) +
     # Plot for Female
@@ -538,15 +544,21 @@ plot_cumulative_data <- function(dt, custom_title) {
     # RDS Points
     # Add small inner points for Mean_age_cumulative
     geom_point(aes(y = Mean_age_cumulative), color = "darkblue", 
-               size = 3, shape = 16, alpha = 0.8) +
+               size = 5, shape = 16, alpha = 0.6) +
+    geom_line(aes(y = Mean_age_cumulative), color = "darkblue", 
+              linewidth = 1, alpha = 0.6) +
+  
     # # Add small inner points for Female_cumulative
     # geom_point(aes(y = Female_cumulative * 100), color = "tomato", 
     #            size = 3, shape = 16, alpha = 0.8) +
     
     # Probability Sampling Points
     # Add small inner points for Mean_age_cumulative
-    geom_point(aes(y = PS_mean_age_cumulative), color = "darkblue",
-               size = 3, shape = 15, alpha = 0.8) +
+    geom_point(aes(y = PS_mean_age_cumulative), color = "tomato",
+               size = 3, shape = 4, stroke = 3, alpha = 0.6) +
+    geom_line(aes(y = PS_mean_age_cumulative), color = "tomato", 
+              linewidth = 1, alpha = 0.6) +
+    
     # # Add small inner points for Female_cumulative
     # geom_point(aes(y = PS_female_cumulative * 100), color = "tomato",
     #            size = 3, shape = 15, alpha = 0.8) +
@@ -571,7 +583,7 @@ plot_cumulative_data <- function(dt, custom_title) {
     # Configure the y-axis for Mean Age and Percent Female
     scale_y_continuous(name = "Mean Age (yr)", 
                        breaks = seq(0, 100, by = 10),
-                       limits = c(0, 100)) + 
+                       limits = c(0, 70)) + 
     
     # Configure colors
     scale_color_manual(values = c("Mean Age" = "darkblue", "Female" = "tomato")) +
@@ -584,28 +596,42 @@ plot_cumulative_data <- function(dt, custom_title) {
     # Theme settings, increasing font size for axis labels and ticks
     theme_minimal() +
     theme(
-      axis.title.y.right = element_text(color = "tomato", size = 14),   # Increase font size for right y-axis label
-      axis.text.y.right = element_text(color = "tomato", size = 12),    # Increase font size for right y-axis ticks
-      axis.title.y.left = element_text(color = "darkblue", size = 14),  # Increase font size for left y-axis label
-      axis.text.y.left = element_text(color = "darkblue", size = 12),   # Increase font size for left y-axis ticks
-      axis.title.x = element_text(size = 14),  # Increase font size for x-axis label
-      axis.text.x = element_text(size = 12),   # Increase font size for x-axis ticks
+      axis.title.y.right = element_text(color = "tomato", size = 28),   # Increase font size for right y-axis label
+      axis.text.y.right = element_text(color = "tomato", size = 28),    # Increase font size for right y-axis ticks
+      axis.title.y.left = element_text(color = "darkblue", size = 28),  # Increase font size for left y-axis label
+      axis.text.y.left = element_text(color = "darkblue", size = 28),   # Increase font size for left y-axis ticks
+      axis.title.x = element_text(size = 28),  # Increase font size for x-axis label
+      axis.text.x = element_text(size = 28),   # Increase font size for x-axis ticks
       legend.position = "none"  # Remove all legends
     ) +
+    
+    # Add points and labels for Legend
+    geom_point(aes(x = 4, y = 70), color = "tomato", 
+               size = 6, shape = 4, stroke = 3, alpha = 0.6) +
+    geom_point(aes(x = 4, y = 62), color = "darkblue", shape = 16, 
+               size = 10, alpha = 0.6) +
+    # PS
+    annotate("text", x = 7.9, y = 70, label = "Probability Sample", hjust = 1, color = "black", size = 10) +
+    # RDS
+    annotate("text", x = 5.3, y = 62, label = "RDS", hjust = 1, color = "black", size = 10) +
+    
+
+    
     # Add horizontal lines
     geom_hline(yintercept = 41.5, linetype = "dashed", color = "darkblue") +
     # geom_hline(yintercept = 70, linetype = "dashed", color = "tomato") +  # Female * 100
     # Add labels for the horizontal lines
-    annotate("text", x = 2.4, y = 50, label = "Population Mean (41)", hjust = 1, color = "darkblue") +
+    annotate("text", x = 8, y = 35, label = "Pop Mean (41)", hjust = 1, color = "darkblue", size = 10) +
     # annotate("text", x = 3.65, y = 73, label = "Population Proportion", hjust = 1, color = "tomato") +
     # Add labels for the shaded areas and sample sizes
-    annotate("text", x = 1.25, y = 90, label = "Burn In: 3 Waves", hjust = 0.5, color = "black", fontface = "bold") +
-    annotate("text", x = 1.4, y = 18, label = paste0("Seed n=", as.character(min(dt$Participants_cumulative))),
-             hjust = 1, color = "black", fontface = "bold") + 
-    annotate("text", x = 8, y = 25, label = "Square: Probability Sample",
-             hjust = 1, color = "black", fontface = "bold") + 
-    annotate("text", x = 6, y = 18, label = "Circle: RDS",
-             hjust = 1, color = "black", fontface = "bold")
+    annotate("text", x = 1.25, y = 65, label = "Burn In: \n3 Waves", 
+             hjust = 0.5, color = "black", fontface = "bold", size = 10) +
+    annotate("text", x = 1.4, y = 15, label = paste0("Seed\nn=", as.character(min(dt$Participants_cumulative))),
+             hjust = 1, color = "black", fontface = "bold", size = 10) + 
+    annotate("text", x = 5, y = 15, label = paste0("Wave 5\nn=", as.character(dt$Participants_cumulative[5])),
+             hjust = 1, color = "black", fontface = "bold", size = 10) + 
+    annotate("text", x = 8.5, y = 15, label = paste0("Final \nn=", as.character(dt$Participants_cumulative[9])),
+             hjust = 1, color = "black", fontface = "bold", size = 10)
     # annotate("text", x = 8.4, y = 18, label = paste0("n=", as.character(max(dt$Participants_cumulative))),
     #          hjust = 1, color = "black", fontface = "bold")
   
@@ -613,12 +639,13 @@ plot_cumulative_data <- function(dt, custom_title) {
   print(p)
 }
 
-# Plot the data after removing the burn-in waves
-burn_in = 0
-plot_wave_data(rds_data[burn_in:nrow(rds_data),],
-               "Average Age and Proportion Female in Each Wave After ")
+# Plot the data
 plot_cumulative_data(rds_data[burn_in:nrow(rds_data),], 
-                     "Cumulative Sample Age: RDS and Probability Sampling")
+                     "")
+
+# plot_wave_data(rds_data[burn_in:nrow(rds_data),],
+#                "Average Age and Proportion Female in Each Wave After ")
+
 
 
 
