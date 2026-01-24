@@ -1,6 +1,12 @@
 library(igraph)
 library(ggplot2)
 library(data.table)
+library(extrafont)
+
+# for fonts
+# font_import()  # Will import all system fonts, including Arial
+# loadfonts(device = "win")  # For Windows
+
 
 # --- GENERATE NETWORK -----------
 
@@ -11,7 +17,7 @@ g <- make_empty_graph(n = num_nodes, directed = FALSE)
 # Assign age distribution to nodes with a normal distribution between 18 and 65
 set.seed(123)  # Set seed for reproducibility
 ages <- round(rnorm(num_nodes, mean = 41.5, sd = 10))  # Mean of (18+65)/2 and sd chosen
-ages <- pmax(pmin(ages, 65), 18)  # Ensure ages are within 18 to 65
+ages <- pmax(pmin(ages, 100), 18)  # Ensure ages are within 18 to 65
 V(g)$age <- ages
 
 # Assign binary female distribution 70/30 female/male
@@ -19,8 +25,8 @@ females <- sample(c(1, 0), num_nodes, replace = TRUE, prob = c(0.7, 0.3))
 V(g)$female <- females
 
 # Set average and sd degree
-avg_degree <- 7
-sd_degree <- 2
+avg_degree <- 6
+sd_degree <- 4
 
 # Choose level of homophily
 homophily = 0.9
@@ -28,7 +34,7 @@ homophily = 0.9
 # Compute number of edges needed
 num_edges <- round((avg_degree * num_nodes) / 2)
 
-# Create an empty edge list
+# Create an empty edge list=
 edge_list <- vector("list", num_edges)
 
 # Generate edges with trait homophily based on gender and age similarity
