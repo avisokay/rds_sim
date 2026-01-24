@@ -36,13 +36,13 @@ set.seed(123)  # Set seed for reproducibility
 for (i in 1:num_edges) {
   # Choose first node randomly
   node1 <- sample(1:num_nodes, 1)
-  
+
   # Determine potential nodes with same gender (higher probability)
   same_gender_nodes <- which(V(g)$female == V(g)$female[node1])
-  
+
   # Within same gender nodes, further narrow down to same age (even higher probability)
   same_age_nodes <- same_gender_nodes[V(g)$age[same_gender_nodes] == V(g)$age[node1]]
-  
+
   # Define probabilities for connecting based on the homophily criteria
   if (length(same_age_nodes) > 1) {
     # Higher probability for nodes with the same gender and age
@@ -51,7 +51,7 @@ for (i in 1:num_edges) {
     # Otherwise, choose from nodes with the same gender
     node2 <- sample(same_gender_nodes[same_gender_nodes != node1], homophily)
   }
-  
+
   # Add edge to the edge list
   edge_list[[i]] <- c(node1, node2)
 }
@@ -107,7 +107,7 @@ if (length(non_representative_candidates) >= 100) {
   cat("Less than 100 non-representative nodes found; selected all", length(non_representative_sample), "nodes.\n")
 }
 
-# mostly young men 
+# mostly young men
 young_men = V(g)[V(g)$age < 22 & V(g)$female == 0]
 mostly_young_men = union(young_men, sample(V(g), 20))
 
@@ -139,24 +139,24 @@ rrds_participants[[1]] <- seeds  # Initial seeds are the first wave
 for (wave in 1:num_waves) {
   current_wave_participants <- rrds_participants[[wave]]
   next_wave_participants <- c()  # Initialize next wave participants
-  
+
   for (participant in current_wave_participants) {
     # Find neighbors of the current participant
     neighbors <- neighbors(g, participant)
-    
+
     # Exclude already sampled participants to prevent duplicate recruitment
     eligible_neighbors <- setdiff(neighbors, unlist(rrds_participants))
-    
+
     # Recruit up to 3 new participants from eligible neighbors
     if (length(eligible_neighbors) > 0) {
       recruits <- sample(eligible_neighbors, min(recruits_per_person, length(eligible_neighbors)))
       next_wave_participants <- c(next_wave_participants, recruits)
     }
   }
-  
+
   # Store the participants for the next wave
   rrds_participants[[wave + 1]] <- next_wave_participants
-  
+
   # Stop if no more recruits are possible
   if (length(next_wave_participants) == 0) {
     break
@@ -179,40 +179,40 @@ cumulative_participants <- c()
 
 # Output details about each wave and compute cumulative statistics
 for (wave in 1:length(rrds_participants)) {
-  
+
   # wave
   n_wave[[wave]] = wave-1 # assign
-  
+
   # n_participants
   participants <- rrds_participants[[wave]]
   n_participants[[wave]] = length(participants) # assign
   cat("Wave", wave - 1, "Participants:", length(participants), "\n")
-  
+
   # average age of participants in this wave
   avg_age[[wave]] = mean(V(g)$age[participants])
-  
+
   # proportion female in this wave
   gender_counts <- table(V(g)$female[participants])
   prop_female[[wave]] <- prop.table(gender_counts)[2]
-  
+
   # Combine participants from all waves up to the current wave
   cumulative_participants <- c(cumulative_participants, rrds_participants[[wave]])
   cumulative_participants <- unique(cumulative_participants)  # Remove duplicates
   c_participants[[wave]] = length(cumulative_participants) # assign
-  
+
   cat("Cumulative Statistics up to Wave", wave - 1, "\n")
   cat("  Number of Participants:", length(cumulative_participants), "\n")
-  
+
   if (length(cumulative_participants) > 0) {
     # Calculate cumulative mean age for the participants up to the current wave
     cumulative_mean_age <- mean(V(g)$age[cumulative_participants])
     c_avg_age[[wave]] = cumulative_mean_age
-    
+
     # Calculate cumulative gender proportion for the participants up to the current wave
     cumulative_gender_counts <- table(V(g)$female[cumulative_participants])
     cumulative_gender_proportions <- prop.table(cumulative_gender_counts)
     c_prop_female[[wave]] = cumulative_gender_proportions[2]
-    
+
     # Output cumulative statistics
     cat("  Cumulative Average Age:", round(cumulative_mean_age, 2), "\n")
     cat("  Cumulative Gender Proportion (Female/Male):\n")
@@ -220,13 +220,13 @@ for (wave in 1:length(rrds_participants)) {
   } else {
     cat("  No participants up to this wave.\n")
   }
-  
+
   cat("\n")
 }
 
 rrds_results_table = data.frame(Wave = unlist(n_wave),
                                Participants = unlist(n_participants),
-                               Mean_age = unlist(avg_age), 
+                               Mean_age = unlist(avg_age),
                                Female = unlist(prop_female),
                                Participants_cumulative = unlist(c_participants),
                                Mean_age_cumulative = unlist(c_avg_age),
@@ -242,38 +242,38 @@ rds_participants[[1]] <- seeds  # Initial seeds are the first wave
 for (wave in 1:num_waves) {
   current_wave_participants <- rds_participants[[wave]]
   next_wave_participants <- c()  # Initialize next wave participants
-  
+
   for (participant in current_wave_participants) {
     # Find neighbors of the current participant
     neighbors <- neighbors(g, participant)
-    
+
     # Exclude already sampled participants to prevent duplicate recruitment
     eligible_neighbors <- setdiff(neighbors, unlist(rds_participants))
-    
+
     # Step 4: Sort Eligible Neighbors by Similarity (same gender first, then closest age)
     if (length(eligible_neighbors) > 0) {
       # Convert eligible_neighbors to numeric indices
       eligible_neighbor_indices <- as.numeric(eligible_neighbors)
-      
+
       # Extract participant gender and age
       participant_gender <- V(g)$female[participant]
       participant_age <- V(g)$age[participant]
-      
+
       # Sort eligible neighbors: same gender first, then by closest age
       sorted_neighbors <- eligible_neighbor_indices[order(
         V(g)$female[eligible_neighbor_indices] != participant_gender,  # Sort by same gender first
         abs(V(g)$age[eligible_neighbor_indices] - participant_age)  # Then by closest age
       )]
-      
+
       # Recruit up to specified number of participants from sorted eligible neighbors
       recruits <- head(sorted_neighbors, min(recruits_per_person, length(sorted_neighbors)))
       next_wave_participants <- c(next_wave_participants, recruits)
     }
   }
-  
+
   # Store the participants for the next wave
   rds_participants[[wave + 1]] <- next_wave_participants
-  
+
   # Stop if no more recruits are possible
   if (length(next_wave_participants) == 0) {
     break
@@ -296,40 +296,40 @@ cumulative_participants <- c()
 
 # Output details about each wave and compute cumulative statistics
 for (wave in 1:length(rds_participants)) {
-  
+
   # wave
   n_wave[[wave]] = wave-1 # assign
-  
+
   # n_participants
   participants <- rds_participants[[wave]]
   n_participants[[wave]] = length(participants) # assign
   cat("Wave", wave - 1, "Participants:", length(participants), "\n")
-  
+
   # average age of participants in this wave
   avg_age[[wave]] = mean(V(g)$age[participants])
-  
+
   # proportion female in this wave
   gender_counts <- table(V(g)$female[participants])
   prop_female[[wave]] <- prop.table(gender_counts)[2]
-  
+
   # Combine participants from all waves up to the current wave
   cumulative_participants <- c(cumulative_participants, rds_participants[[wave]])
   cumulative_participants <- unique(cumulative_participants)  # Remove duplicates
   c_participants[[wave]] = length(cumulative_participants) # assign
-  
+
   cat("Cumulative Statistics up to Wave", wave - 1, "\n")
   cat("  Number of Participants:", length(cumulative_participants), "\n")
-  
+
   if (length(cumulative_participants) > 0) {
     # Calculate cumulative mean age for the participants up to the current wave
     cumulative_mean_age <- mean(V(g)$age[cumulative_participants])
     c_avg_age[[wave]] = cumulative_mean_age
-    
+
     # Calculate cumulative gender proportion for the participants up to the current wave
     cumulative_gender_counts <- table(V(g)$female[cumulative_participants])
     cumulative_gender_proportions <- prop.table(cumulative_gender_counts)
     c_prop_female[[wave]] = cumulative_gender_proportions[2]
-    
+
     # Output cumulative statistics
     cat("  Cumulative Average Age:", round(cumulative_mean_age, 2), "\n")
     cat("  Cumulative Gender Proportion (Female/Male):\n")
@@ -337,130 +337,78 @@ for (wave in 1:length(rds_participants)) {
   } else {
     cat("  No participants up to this wave.\n")
   }
-  
+
   cat("\n")
 }
 
 rds_results_table = data.frame(Wave = unlist(n_wave),
                                Participants = unlist(n_participants),
-                               Mean_age = unlist(avg_age), 
+                               Mean_age = unlist(avg_age),
                                Female = unlist(prop_female),
                                Participants_cumulative = unlist(c_participants),
                                Mean_age_cumulative = unlist(c_avg_age),
                                Female_cumulative = unlist(c_prop_female))
 
 # --- PLOT RESULTS -------
-rrds_data = as.data.table(rrds_results_table)
-rds_data = as.data.table(rds_results_table)
+source("plot_rds.R")
 
-# write an intermediate function called plot_both_data
-# that takes in both datasets (rrds and rds) and computes
-# lower = min(min(rrds), min(rds)) and same for upper with max
-# and then pass lower and upper as arguments to plot_wave_data
-# and plot_cumulative_data
+rrds_data <- as.data.table(rrds_results_table)
+rds_data <- as.data.table(rds_results_table)
 
-# Define the function
-plot_wave_data <- function(dt, custom_title) {
-  # Ensure dt is a data.table
-  if (!is.data.table(dt)) {
-    stop("Input must be a data.table.")
-  }
+burn_in <- 0
+seed_n <- length(seeds)
 
-  # Create the plot
-  p <- ggplot(dt, aes(x = Wave)) +
-    # Plot for Mean_age
-    geom_point(aes(y = Mean_age, color = "Mean Age", size = Participants), alpha=0.6) +
-    scale_size_continuous(range=c(min(dt$Participants)/min(dt$Participants), 
-                                  max(dt$Participants)/min(dt$Participants))) +
-    scale_y_continuous(name = "Mean Age (yr)", 
-                       breaks = seq(0, 100, by = 10),
-                       limits = c(0, 100),
-                       sec.axis = sec_axis(~ ., name = "Percent Female")) +
-    # Plot for Female
-    geom_point(aes(y = Female * 100, color = "Female", size = Participants), alpha=0.6) +
-    scale_color_manual(values = c("Mean Age" = "darkblue", "Female" = "tomato")) +
-    labs(title = custom_title,
-         x = "Wave") +
-    scale_x_continuous(breaks = seq(0, num_waves, by = 1), limits = c(0, num_waves)) +
-    theme_minimal() +
-    theme(
-      axis.title.y.right = element_text(color = "tomato"),
-      axis.text.y.right = element_text(color = "tomato"),
-      axis.title.y.left = element_text(color = "darkblue"),
-      axis.text.y.left = element_text(color = "darkblue"),
-      legend.position = "none"  # Remove all legends
-    ) +
-    # Add horizontal lines
-    geom_hline(yintercept = 41.5, linetype = "dashed", color = "darkblue") +
-    geom_hline(yintercept = 70, linetype = "dashed", color = "tomato") +  # Female * 100
-    # Add labels for the horizontal lines
-    annotate("text", x = 3.32, y = 44, label = "Population Average", hjust = 1, color = "darkblue") +
-    annotate("text", x = 3.65, y = 73, label = "Population Proportion", hjust = 1, color = "tomato")
-  
-  # Print the plot
-  print(p)
-}
+# Calculate global maximum participants across both datasets for consistent scaling
+global_max <- calc_global_max(rds_data, rrds_data)
 
-# Define the function
-plot_cumulative_data <- function(dt, custom_title) {
-  # Ensure dt is a data.table
-  if (!is.data.table(dt)) {
-    stop("Input must be a data.table.")
-  }
-  
-  # Create the plot
-  p <- ggplot(dt, aes(x = Wave)) +
-    # Plot for Mean_age_cumulative
-    geom_point(aes(y = Mean_age_cumulative, color = "Mean Age", size = Participants_cumulative), alpha=0.6) +
-    scale_size_continuous(range=c(min(dt$Participants_cumulative)/min(dt$Participants_cumulative),
-                                  max(dt$Participants_cumulative)/min(dt$Participants_cumulative))) +
-    scale_y_continuous(name = "Mean Age (yr)", 
-                       breaks = seq(0, 100, by = 10),
-                       limits = c(0, 100),
-                       sec.axis = sec_axis(~ ., name = "Percent Female")) +
-    # Plot for Female_cumulative
-    geom_point(aes(y = Female_cumulative * 100, color = "Female", size = Participants_cumulative), alpha=0.6) +
-    scale_color_manual(values = c("Mean Age" = "darkblue", "Female" = "tomato")) +
-    labs(title = custom_title,
-         x = "Wave") +
-    scale_x_continuous(breaks = seq(0, num_waves, by = 1), limits = c(0, num_waves)) +
-    theme_minimal() +
-    theme(
-      axis.title.y.right = element_text(color = "tomato"),
-      axis.text.y.right = element_text(color = "tomato"),
-      axis.title.y.left = element_text(color = "darkblue"),
-      axis.text.y.left = element_text(color = "darkblue"),
-      legend.position = "none"  # Remove all legends
-    ) +
-    # Add horizontal lines
-    geom_hline(yintercept = 41.5, linetype = "dashed", color = "darkblue") +
-    geom_hline(yintercept = 70, linetype = "dashed", color = "tomato") +  # Female * 100
-    # Add labels for the horizontal lines
-    annotate("text", x = 3.32, y = 44, label = "Population Average", hjust = 1, color = "darkblue") +
-    annotate("text", x = 3.65, y = 73, label = "Population Proportion", hjust = 1, color = "tomato") +
-    annotate("text", x = 1.8, y = 18, label = "Seed n=76", hjust = 1, color = "black")
-  
-  # Print the plot
-  print(p)
-}
+# Create comparison plots with consistent scaling
+sample_plot <- plot_wave_comparison(
+  rds_data[burn_in:nrow(rds_data), ],
+  rrds_data[burn_in:nrow(rrds_data), ],
+  custom_title = "Wave-by-wave Statistics",
+  global_max_participants = global_max,
+  seed_n = seed_n
+)
 
-# Plot the data after removing the burn-in waves
-burn_in = 0
-plot_wave_data(rds_data[burn_in:nrow(rds_data),],
-               paste0("Average Age and Proportion Female in Each Wave \nRDS. Burn-in waves: ", burn_in))
-plot_wave_data(rrds_data[burn_in:nrow(rds_data),],
-               paste0("Average Age and Proportion Female in Each Wave \nRRDS. Burn-in waves: ", burn_in))
-plot_cumulative_data(rds_data[burn_in:nrow(rds_data),], 
-                     paste0("Average Age and Proportion Female in Each Wave \nRDS. Burn-in waves: ", burn_in))
-plot_cumulative_data(rrds_data[burn_in:nrow(rds_data),], 
-                     paste0("Average Age and Proportion Female in Each Wave \nRRDS. Burn-in waves: ", burn_in))
+cumulative_plot <- plot_cumulative_comparison(
+  rds_data[burn_in:nrow(rds_data), ],
+  rrds_data[burn_in:nrow(rrds_data), ],
+  custom_title = "Cumulative Statistics",
+  global_max_participants = global_max,
+  seed_n = seed_n
+)
 
+# Save plots as high-resolution PDFs
+save_plot(sample_plot, "plots/sample.pdf")
+save_plot(cumulative_plot, "plots/cumulative.pdf")
 
+# Create the combined 2x2 plot
+combined_plot <- plot_combined_comparison(
+  rds_data[burn_in:nrow(rds_data), ],
+  rrds_data[burn_in:nrow(rrds_data), ],
+  paste0("RDS vs RRDS Comparison: Wave and Cumulative Analysis\nBurn-in waves: ", burn_in),
+  global_max_participants = global_max
+)
 
+# Save the combined plot
+save_plot(combined_plot, "plots/combined_comparison.pdf", width = 12, height = 10)
 
+# --- CLEAN VISUALIZATIONS ---
 
+# Simple convergence plots
+age_convergence <- plot_convergence_age(rds_data, rrds_data)
+save_plot(age_convergence, "plots/convergence_age.pdf", width = 8, height = 5)
 
+female_convergence <- plot_convergence_female(rds_data, rrds_data)
+save_plot(female_convergence, "plots/convergence_female.pdf", width = 8, height = 5)
 
+sample_size_plot <- plot_sample_size(rds_data, rrds_data)
+save_plot(sample_size_plot, "plots/sample_size.pdf", width = 8, height = 5)
 
+# Two-panel figure (age + sample size)
+two_panel <- plot_two_panel(rds_data, rrds_data)
+save_plot(two_panel, "plots/two_panel.pdf", width = 10, height = 5)
 
-
+# Three-panel figure (age + female + sample size)
+three_panel <- plot_three_panel(rds_data, rrds_data)
+save_plot(three_panel, "plots/three_panel.pdf", width = 12, height = 4)

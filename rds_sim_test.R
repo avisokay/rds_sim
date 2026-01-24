@@ -477,148 +477,27 @@ rds_results_table$PS_mean_age_cumulative = unlist(PS_mean_age)
 rds_results_table$PS_female_cumulative = unlist(PS_female)
 
 # --- PLOT RESULTS -------
-rds_data = as.data.table(rds_results_table)
+source("plot_rds.R")
 
-# Define the function
-plot_wave_data <- function(dt, custom_title) {
-  # Ensure dt is a data.table
-  if (!is.data.table(dt)) {
-    stop("Input must be a data.table.")
-  }
-  
-  # Create the plot
-  p <- ggplot(dt, aes(x = Wave)) +
-    # Plot for Mean_age
-    geom_point(aes(y = Mean_age, color = "Mean Age", size = Participants), alpha=0.6) +
-    scale_size_continuous(range=c(min(dt$Participants)/min(dt$Participants), 
-                                  max(dt$Participants)/min(dt$Participants))) +
-    scale_y_continuous(name = "Mean Age (yr)", 
-                       breaks = seq(0, 100, by = 10),
-                       limits = c(0, 100),
-                       sec.axis = sec_axis(~ ., name = "Percent Female")) +
-    # Plot for Female
-    geom_point(aes(y = Female * 100, color = "Female", size = Participants), alpha=0.6) +
-    scale_color_manual(values = c("Mean Age" = "darkblue", "Female" = "tomato")) +
-    labs(title = custom_title,
-         x = "Wave") +
-    scale_x_continuous(breaks = seq(0, num_waves, by = 1), limits = c(0, num_waves)) +
-    theme_minimal() +
-    theme(
-      axis.title.y.right = element_text(color = "tomato"),
-      axis.text.y.right = element_text(color = "tomato"),
-      axis.title.y.left = element_text(color = "darkblue"),
-      axis.text.y.left = element_text(color = "darkblue"),
-      legend.position = "none"  # Remove all legends
-    ) +
-    # Add horizontal lines
-    geom_hline(yintercept = 41.5, linetype = "dashed", color = "darkblue") +
-    geom_hline(yintercept = 70, linetype = "dashed", color = "tomato") +  # Female * 100
-    # Add labels for the horizontal lines
-    annotate("text", x = 3.32, y = 44, label = "Population Average", hjust = 1, color = "darkblue") +
-    annotate("text", x = 3.65, y = 73, label = "Population Proportion", hjust = 1, color = "tomato") +
-    annotate("text", x = 1.8, y = 18, label = "Seed n=6", hjust = 1, color = "black")
-  
-  # Print the plot
-  print(p)
-}
+rds_data <- as.data.table(rds_results_table)
 
-# Define the function to plot cumulative waves
-plot_cumulative_data <- function(dt, custom_title) {
-  # Ensure dt is a data.table
-  if (!is.data.table(dt)) {
-    stop("Input must be a data.table.")
-  }
-  
-  # Create the plot
-  p <- ggplot(dt, aes(x = Wave)) +
-    # Add a shaded background area for Burn In and Final Sample
-    geom_rect(aes(xmin = 0, xmax = 2.5, ymin = -Inf, ymax = Inf), fill = "lightgrey", alpha = 0.3) +
-    # geom_rect(aes(xmin = 7.5, xmax = 8.5, ymin = -Inf, ymax = Inf), fill = "lightgrey", alpha = 0.3) +
-    
-    # RDS Points
-    # Add small inner points for Mean_age_cumulative
-    geom_point(aes(y = Mean_age_cumulative), color = "darkblue", 
-               size = 3, shape = 16, alpha = 0.8) +
-    # # Add small inner points for Female_cumulative
-    # geom_point(aes(y = Female_cumulative * 100), color = "tomato", 
-    #            size = 3, shape = 16, alpha = 0.8) +
-    
-    # Probability Sampling Points
-    # Add small inner points for Mean_age_cumulative
-    geom_point(aes(y = PS_mean_age_cumulative), color = "darkblue",
-               size = 3, shape = 15, alpha = 0.8) +
-    # # Add small inner points for Female_cumulative
-    # geom_point(aes(y = PS_female_cumulative * 100), color = "tomato",
-    #            size = 3, shape = 15, alpha = 0.8) +
-    
-    # # Probability Sampling with Selection Points
-    # # Add small inner points for Mean_age_cumulative
-    # geom_point(aes(y = PSS_mean_age_cumulative), color = "darkblue",
-    #            size = 3, shape = 16, alpha = 0.8) +
-    # # Add small inner points for Female_cumulative
-    # geom_point(aes(y = PSS_female_cumulative * 100), color = "tomato",
-    #            size = 3, shape = 16, alpha = 0.8) +
+burn_in <- 0
 
-    
-    # # Configure the y-axis for Mean Age and Percent Female
-    # scale_y_continuous(name = "Mean Age (yr)", 
-    #                    breaks = seq(0, 100, by = 10),
-    #                    limits = c(0, 100),
-    #                    sec.axis = sec_axis(~ ., 
-    #                                        name = "Percent Female",
-    #                                        breaks = seq(0, 100, by = 10))) + # Breaks every 10% for Percent Female
-    
-    # Configure the y-axis for Mean Age and Percent Female
-    scale_y_continuous(name = "Mean Age (yr)", 
-                       breaks = seq(0, 100, by = 10),
-                       limits = c(0, 100)) + 
-    
-    # Configure colors
-    scale_color_manual(values = c("Mean Age" = "darkblue", "Female" = "tomato")) +
-    
-    # Add labels and titles
-    labs(title = custom_title, x = "Wave") +
-    
-    # Configure the x-axis
-    scale_x_continuous(breaks = seq(0, num_waves, by = 1), limits = c(0, num_waves+0.5)) +
-    # Theme settings, increasing font size for axis labels and ticks
-    theme_minimal() +
-    theme(
-      axis.title.y.right = element_text(color = "tomato", size = 14),   # Increase font size for right y-axis label
-      axis.text.y.right = element_text(color = "tomato", size = 12),    # Increase font size for right y-axis ticks
-      axis.title.y.left = element_text(color = "darkblue", size = 14),  # Increase font size for left y-axis label
-      axis.text.y.left = element_text(color = "darkblue", size = 12),   # Increase font size for left y-axis ticks
-      axis.title.x = element_text(size = 14),  # Increase font size for x-axis label
-      axis.text.x = element_text(size = 12),   # Increase font size for x-axis ticks
-      legend.position = "none"  # Remove all legends
-    ) +
-    # Add horizontal lines
-    geom_hline(yintercept = 41.5, linetype = "dashed", color = "darkblue") +
-    # geom_hline(yintercept = 70, linetype = "dashed", color = "tomato") +  # Female * 100
-    # Add labels for the horizontal lines
-    annotate("text", x = 2.4, y = 50, label = "Population Mean (41)", hjust = 1, color = "darkblue") +
-    # annotate("text", x = 3.65, y = 73, label = "Population Proportion", hjust = 1, color = "tomato") +
-    # Add labels for the shaded areas and sample sizes
-    annotate("text", x = 1.25, y = 90, label = "Burn In: 3 Waves", hjust = 0.5, color = "black", fontface = "bold") +
-    annotate("text", x = 1.4, y = 18, label = paste0("Seed n=", as.character(min(dt$Participants_cumulative))),
-             hjust = 1, color = "black", fontface = "bold") + 
-    annotate("text", x = 8, y = 25, label = "Square: Probability Sample",
-             hjust = 1, color = "black", fontface = "bold") + 
-    annotate("text", x = 6, y = 18, label = "Circle: RDS",
-             hjust = 1, color = "black", fontface = "bold")
-    # annotate("text", x = 8.4, y = 18, label = paste0("n=", as.character(max(dt$Participants_cumulative))),
-    #          hjust = 1, color = "black", fontface = "bold")
-  
-  # Print the plot
-  print(p)
-}
+# Plot wave data
+plot_wave_data(
+  rds_data[burn_in:nrow(rds_data), ],
+  "Average Age and Proportion Female in Each Wave",
+  num_waves = num_waves,
+  seed_n = num_seeds
+)
 
-# Plot the data after removing the burn-in waves
-burn_in = 0
-plot_wave_data(rds_data[burn_in:nrow(rds_data),],
-               "Average Age and Proportion Female in Each Wave After ")
-plot_cumulative_data(rds_data[burn_in:nrow(rds_data),], 
-                     "Cumulative Sample Age: RDS and Probability Sampling")
+# Plot RDS vs Probability Sampling comparison
+plot_rds_vs_ps_cumulative(
+  rds_data[burn_in:nrow(rds_data), ],
+  "Cumulative Sample Age: RDS and Probability Sampling",
+  num_waves = num_waves,
+  burn_in_waves = 3
+)
 
 
 
