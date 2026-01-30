@@ -368,16 +368,18 @@ plot_convergence_age <- function(rds_dt, rrds_dt, pop_mean = 41.5) {
 
   combined_dt <- rbind(rds_dt_plot, rrds_dt_plot)
 
+  max_wave <- max(combined_dt$Wave)
+
   p <- ggplot(combined_dt, aes(x = Wave, y = Mean_age_cumulative, color = Method)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 3) +
-    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40", linewidth = 0.8) +
-    annotate("text", x = max(combined_dt$Wave), y = pop_mean + 1.5,
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 4) +
+    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40", linewidth = 1) +
+    annotate("text", x = max_wave, y = pop_mean + 1.5,
              label = paste0("Population Mean (", pop_mean, ")"),
-             hjust = 1, color = "gray40", size = 4) +
+             hjust = 1, color = "gray40", size = 6) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(limits = c(20, 50)) +
-    scale_x_continuous(breaks = seq(0, max(combined_dt$Wave), by = 2)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(
       title = "Convergence to Population Mean Age",
       subtitle = "Cumulative sample mean by recruitment wave",
@@ -385,11 +387,17 @@ plot_convergence_age <- function(rds_dt, rrds_dt, pop_mean = 41.5) {
       y = "Cumulative Mean Age (years)",
       color = "Method"
     ) +
-    theme_minimal(base_size = 14) +
+    theme_minimal(base_size = 18) +
     theme(
-      plot.title = element_text(face = "bold", size = 16),
-      plot.subtitle = element_text(color = "gray40"),
-      legend.position = "bottom",
+      plot.title = element_text(face = "bold", size = 22),
+      plot.subtitle = element_text(color = "gray40", size = 16),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 16),
+      legend.text = element_text(size = 16),
+      legend.title = element_blank(),
+      legend.position = "inside",
+      legend.position.inside = c(0.85, 0.25),
+      legend.background = element_rect(fill = "white", color = NA),
       panel.grid.minor = element_blank()
     )
 
@@ -410,16 +418,18 @@ plot_convergence_female <- function(rds_dt, rrds_dt, pop_prop = 0.70) {
 
   combined_dt <- rbind(rds_dt_plot, rrds_dt_plot)
 
+  max_wave <- max(combined_dt$Wave)
+
   p <- ggplot(combined_dt, aes(x = Wave, y = Female_cumulative * 100, color = Method)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 3) +
-    geom_hline(yintercept = pop_prop * 100, linetype = "dashed", color = "gray40", linewidth = 0.8) +
-    annotate("text", x = max(combined_dt$Wave), y = pop_prop * 100 + 3,
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 4) +
+    geom_hline(yintercept = pop_prop * 100, linetype = "dashed", color = "gray40", linewidth = 1) +
+    annotate("text", x = max_wave, y = pop_prop * 100 + 3,
              label = paste0("Population (", pop_prop * 100, "%)"),
-             hjust = 1, color = "gray40", size = 4) +
+             hjust = 1, color = "gray40", size = 6) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(limits = c(20, 80)) +
-    scale_x_continuous(breaks = seq(0, max(combined_dt$Wave), by = 2)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(
       title = "Convergence to Population Proportion Female",
       subtitle = "Cumulative sample proportion by recruitment wave",
@@ -427,11 +437,17 @@ plot_convergence_female <- function(rds_dt, rrds_dt, pop_prop = 0.70) {
       y = "Cumulative % Female",
       color = "Method"
     ) +
-    theme_minimal(base_size = 14) +
+    theme_minimal(base_size = 18) +
     theme(
-      plot.title = element_text(face = "bold", size = 16),
-      plot.subtitle = element_text(color = "gray40"),
-      legend.position = "bottom",
+      plot.title = element_text(face = "bold", size = 22),
+      plot.subtitle = element_text(color = "gray40", size = 16),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 16),
+      legend.text = element_text(size = 16),
+      legend.title = element_blank(),
+      legend.position = "inside",
+      legend.position.inside = c(0.85, 0.25),
+      legend.background = element_rect(fill = "white", color = NA),
       panel.grid.minor = element_blank()
     )
 
@@ -457,11 +473,13 @@ plot_sample_size <- function(rds_dt, rrds_dt) {
   final_rrds <- max(rrds_dt$Participants_cumulative)
   pct_diff <- round((final_rrds - final_rds) / final_rds * 100)
 
+  max_wave <- max(combined_dt$Wave)
+
   p <- ggplot(combined_dt, aes(x = Wave, y = Participants_cumulative, color = Method)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 3) +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 4) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
-    scale_x_continuous(breaks = seq(0, max(combined_dt$Wave), by = 2)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     scale_y_continuous(labels = scales::comma) +
     labs(
       title = "Cumulative Sample Size",
@@ -470,11 +488,17 @@ plot_sample_size <- function(rds_dt, rrds_dt) {
       y = "Cumulative Participants (n)",
       color = "Method"
     ) +
-    theme_minimal(base_size = 14) +
+    theme_minimal(base_size = 18) +
     theme(
-      plot.title = element_text(face = "bold", size = 16),
-      plot.subtitle = element_text(color = "gray40"),
-      legend.position = "bottom",
+      plot.title = element_text(face = "bold", size = 22),
+      plot.subtitle = element_text(color = "gray40", size = 16),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 16),
+      legend.text = element_text(size = 16),
+      legend.title = element_blank(),
+      legend.position = "inside",
+      legend.position.inside = c(0.15, 0.85),
+      legend.background = element_rect(fill = "white", color = NA),
       panel.grid.minor = element_blank()
     )
 
@@ -496,27 +520,34 @@ plot_two_panel <- function(rds_dt, rrds_dt, pop_mean = 41.5) {
   rrds_dt_plot$Method <- "RRDS"
 
   combined_dt <- rbind(rds_dt_plot, rrds_dt_plot)
+  max_wave <- max(combined_dt$Wave)
 
   # Panel A: Age convergence
   p1 <- ggplot(combined_dt, aes(x = Wave, y = Mean_age_cumulative, color = Method)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 2.5) +
-    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40", linewidth = 0.8) +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 3.5) +
+    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40", linewidth = 1) +
     annotate("text", x = 0.5, y = pop_mean + 1.5,
              label = paste0("Population (", pop_mean, ")"),
-             hjust = 0, color = "gray40", size = 3.5) +
+             hjust = 0, color = "gray40", size = 5) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(limits = c(20, 50)) +
-    scale_x_continuous(breaks = seq(0, max(combined_dt$Wave), by = 2)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(
       title = "A. Convergence to Population Mean Age",
       x = "Wave",
       y = "Cumulative Mean Age (years)"
     ) +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 16) +
     theme(
-      plot.title = element_text(face = "bold", size = 13),
-      legend.position = "none",
+      plot.title = element_text(face = "bold", size = 18),
+      axis.title = element_text(size = 16),
+      axis.text = element_text(size = 14),
+      legend.text = element_text(size = 14),
+      legend.title = element_blank(),
+      legend.position = "inside",
+      legend.position.inside = c(0.8, 0.25),
+      legend.background = element_rect(fill = "white", color = NA),
       panel.grid.minor = element_blank()
     )
 
@@ -526,35 +557,36 @@ plot_two_panel <- function(rds_dt, rrds_dt, pop_mean = 41.5) {
   pct_diff <- round((final_rrds - final_rds) / final_rds * 100)
 
   p2 <- ggplot(combined_dt, aes(x = Wave, y = Participants_cumulative, color = Method)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 2.5) +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 3.5) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
-    scale_x_continuous(breaks = seq(0, max(combined_dt$Wave), by = 2)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     scale_y_continuous(labels = scales::comma) +
     labs(
       title = paste0("B. Cumulative Sample Size (+", pct_diff, "% for RRDS)"),
       x = "Wave",
       y = "Cumulative Participants (n)"
     ) +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 16) +
     theme(
-      plot.title = element_text(face = "bold", size = 13),
+      plot.title = element_text(face = "bold", size = 18),
+      axis.title = element_text(size = 16),
+      axis.text = element_text(size = 14),
       legend.position = "none",
       panel.grid.minor = element_blank()
     )
 
-  # Combine with shared legend
+  # Combine
   combined <- p1 + p2 +
-    plot_layout(ncol = 2, guides = "collect") +
+    plot_layout(ncol = 2) +
     plot_annotation(
       title = "RDS vs RRDS: Bias Correction and Sample Efficiency",
       subtitle = "Starting from biased seeds (mostly young men)",
       theme = theme(
-        plot.title = element_text(face = "bold", size = 16),
-        plot.subtitle = element_text(color = "gray40", size = 12)
+        plot.title = element_text(face = "bold", size = 20),
+        plot.subtitle = element_text(color = "gray40", size = 16)
       )
-    ) &
-    theme(legend.position = "bottom")
+    )
 
   print(combined)
   invisible(combined)
@@ -574,53 +606,69 @@ plot_three_panel <- function(rds_dt, rrds_dt, pop_mean = 41.5, pop_female = 0.70
   rrds_dt_plot$Method <- "RRDS"
 
   combined_dt <- rbind(rds_dt_plot, rrds_dt_plot)
+  max_wave <- max(combined_dt$Wave)
 
   # Panel A: Age convergence
   p1 <- ggplot(combined_dt, aes(x = Wave, y = Mean_age_cumulative, color = Method)) +
-    geom_line(linewidth = 1.1) +
-    geom_point(size = 2) +
-    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40") +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 3) +
+    geom_hline(yintercept = pop_mean, linetype = "dashed", color = "gray40", linewidth = 1) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(limits = c(20, 50)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(title = "A. Mean Age", x = NULL, y = "Years") +
-    theme_minimal(base_size = 11) +
-    theme(plot.title = element_text(face = "bold"), legend.position = "none")
+    theme_minimal(base_size = 16) +
+    theme(plot.title = element_text(face = "bold", size = 18),
+          axis.title = element_text(size = 16),
+          axis.text = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_blank(),
+          legend.position = "inside",
+          legend.position.inside = c(0.75, 0.25),
+          legend.background = element_rect(fill = "white", color = NA))
 
   # Panel B: Female proportion convergence
   p2 <- ggplot(combined_dt, aes(x = Wave, y = Female_cumulative * 100, color = Method)) +
-    geom_line(linewidth = 1.1) +
-    geom_point(size = 2) +
-    geom_hline(yintercept = pop_female * 100, linetype = "dashed", color = "gray40") +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 3) +
+    geom_hline(yintercept = pop_female * 100, linetype = "dashed", color = "gray40", linewidth = 1) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(limits = c(20, 80)) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(title = "B. % Female", x = NULL, y = "Percent") +
-    theme_minimal(base_size = 11) +
-    theme(plot.title = element_text(face = "bold"), legend.position = "none")
+    theme_minimal(base_size = 16) +
+    theme(plot.title = element_text(face = "bold", size = 18),
+          axis.title = element_text(size = 16),
+          axis.text = element_text(size = 14),
+          legend.position = "none")
 
   # Panel C: Sample size
   p3 <- ggplot(combined_dt, aes(x = Wave, y = Participants_cumulative, color = Method)) +
-    geom_line(linewidth = 1.1) +
-    geom_point(size = 2) +
+    geom_line(linewidth = 1.4) +
+    geom_point(size = 3) +
     scale_color_manual(values = c("RDS" = "#E74C3C", "RRDS" = "#3498DB")) +
     scale_y_continuous(labels = scales::comma) +
+    scale_x_continuous(breaks = seq(0, max_wave, by = 2), limits = c(0, max_wave)) +
     labs(title = "C. Sample Size", x = NULL, y = "n") +
-    theme_minimal(base_size = 11) +
-    theme(plot.title = element_text(face = "bold"), legend.position = "none")
+    theme_minimal(base_size = 16) +
+    theme(plot.title = element_text(face = "bold", size = 18),
+          axis.title = element_text(size = 16),
+          axis.text = element_text(size = 14),
+          legend.position = "none")
 
   # Combine
   combined <- p1 + p2 + p3 +
-    plot_layout(ncol = 3, guides = "collect") +
+    plot_layout(ncol = 3) +
     plot_annotation(
-      title = "RDS vs RRDS Comparison",
-      subtitle = "Cumulative statistics by recruitment wave (dashed lines = population truth)",
+      # title = "RDS vs RRDS Comparison",
+      # subtitle = "Cumulative statistics by recruitment wave (dashed lines = population truth)",
       caption = "Seeds: mostly young men | Population: mean age 41.5, 70% female",
       theme = theme(
-        plot.title = element_text(face = "bold", size = 14),
-        plot.subtitle = element_text(color = "gray40"),
-        plot.caption = element_text(color = "gray50", size = 9)
+        plot.title = element_text(face = "bold", size = 20),
+        plot.subtitle = element_text(color = "gray40", size = 16),
+        plot.caption = element_text(color = "gray50", size = 14)
       )
-    ) &
-    theme(legend.position = "bottom")
+    )
 
   print(combined)
   invisible(combined)

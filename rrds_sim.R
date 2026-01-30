@@ -18,9 +18,8 @@ V(g)$age <- ages
 females <- sample(c(1, 0), num_nodes, replace = TRUE, prob = c(0.7, 0.3))
 V(g)$female <- females
 
-# Set average and sd degree
+# Set average degree
 avg_degree <- 2
-sd_degree <- 2
 
 # Choose level of homophily
 homophily = 0.9
